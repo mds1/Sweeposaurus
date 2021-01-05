@@ -53,7 +53,7 @@ interface TokenDetails extends TokenInfo {
 }
 
 function useSweeper() {
-  const { notifyUser, showError } = useAlerts();
+  const { notifyUser, handleError } = useAlerts();
   const { userAddress, signer } = useWalletStore();
 
   const balances = ref<TokenDetails[]>([]);
@@ -140,22 +140,22 @@ function useSweeper() {
       txHash.value = String(tx.hash);
       console.log('Transaction sent', tx);
 
-      const t = setInterval(function () {
-        if (window.goatcounter && window.goatcounter.count) {
-          clearInterval(t);
-          window.goatcounter.count({
-            path: 'transaction-cancelled-2',
-            event: true,
-          });
-        }
-      }, 100);
+      // const t = setInterval(function () {
+      //   if (window.goatcounter && window.goatcounter.count) {
+      //     clearInterval(t);
+      //     window.goatcounter.count({
+      //       path: 'transaction-cancelled-2',
+      //       event: true,
+      //     });
+      //   }
+      // }, 100);
 
       await tx.wait();
       console.log('Transaction mined!');
       notifyUser('positive', 'Your cancellation was successful!');
       isLoading.value = false;
     } catch (e) {
-      showError(e);
+      handleError(e);
       isLoading.value = false;
     }
   }

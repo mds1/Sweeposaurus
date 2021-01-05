@@ -21,7 +21,7 @@ export default function useAlerts() {
    * @param {Any} err Error object thrown
    * @param {Any} msg Optional, fallback error message if one is not provided by the err object
    */
-  function showError(err: Error, msg = 'An unknown error occurred') {
+  function handleError(err: Error, msg = 'An unknown error occurred') {
     console.error(err);
     if (!err) notifyUser('negative', msg);
     else if ('message' in err) notifyUser('negative', err.message);
@@ -31,6 +31,6 @@ export default function useAlerts() {
 
   return {
     notifyUser,
-    showError,
+    handleError,
   };
 }
