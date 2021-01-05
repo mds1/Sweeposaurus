@@ -1,0 +1,67 @@
+{
+  "name": "Sweeposaurus",
+  "version": "0.0.1",
+  "description": "Sweep all of your tokens to another address",
+  "productName": "Sweeposaurus",
+  "author": "Matt Solomon <matt@mattsolomon.dev>",
+  "private": true,
+  "scripts": {
+    "lint": "eslint --ext .js,.ts,.vue ./",
+    "test": "echo \"No test specified\" && exit 0",
+    "prettier": "prettier --write .",
+    "dev": "quasar dev",
+    "build": "quasar build && firebase deploy"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged && quasar build",
+      "pre-push": "lint-staged && quasar build"
+    }
+  },
+  "dependencies": {
+    "@quasar/extras": "^1.0.0",
+    "@unilogin/provider": "^0.6.1",
+    "@vue/composition-api": "^0.6.4",
+    "bnc-onboard": "^1.12.0",
+    "core-js": "^3.6.5",
+    "ethers": "^5.0.7",
+    "quasar": "^1.0.0"
+  },
+  "devDependencies": {
+    "@quasar/app": "^2.0.0",
+    "@quasar/quasar-app-extension-dotenv": "^1.0.5",
+    "@types/node": "^10.17.15",
+    "@typescript-eslint/eslint-plugin": "^3.3.0",
+    "@typescript-eslint/parser": "^3.3.0",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.9.0",
+    "eslint-loader": "^3.0.3",
+    "eslint-plugin-vue": "^6.1.2",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.2.11",
+    "prettier": "^2.0.5"
+  },
+  "browserslist": [
+    "last 10 Chrome versions",
+    "last 10 Firefox versions",
+    "last 4 Edge versions",
+    "last 7 Safari versions",
+    "last 8 Android versions",
+    "last 8 ChromeAndroid versions",
+    "last 8 FirefoxAndroid versions",
+    "last 10 iOS versions",
+    "last 5 Opera versions"
+  ],
+  "engines": {
+    "node": ">= 10.18.1",
+    "npm": ">= 6.13.4",
+    "yarn": ">= 1.21.1"
+  },
+  "lint-staged": {
+    "*.{js,ts,vue}": [
+      "prettier --write",
+      "eslint --cache --fix"
+    ]
+  }
+}

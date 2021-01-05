@@ -1,0 +1,69 @@
+// app global css in Sass form
+*
+  font-family: Avenir,Helvetica,Arial,sans-serif
+
+.card-border-no-hover
+  border: 1px solid $light
+
+.card-border
+  border: 1px solid $light
+
+.card-border:hover
+  border: 1px solid $primary
+  cursor: pointer
+
+.text-gradient
+  background-color: $primary
+  background-clip: text
+  background-image: linear-gradient(130deg, $orange 20%, $blue 100%)
+  color: rgba(0,0,0,0)
+  -webkit-background-clip: text
+  -moz-background-clip: text
+  -webkit-text-fill-color: transparent
+  -moz-text-fill-color: transparent
+
+.cancel-button
+  border-radius: 60%
+  cursor: pointer
+  max-width: 200px
+
+.body--light
+  .dark-toggle
+    color: $dark
+
+  .cancel-button:hover
+    border: 3px solid white
+
+  .hyperlink
+    color: $primary
+    text-decoration: underline
+    cursor: pointer
+    // Without this, the underline extends into the space for some reason
+    // solution source: https://stackoverflow.com/questions/23182904/css-underline-text-but-ignore-the-spaces
+    display: inline-block
+
+.body--dark
+  .dark-toggle
+    color: $light
+
+  .cancel-button:hover
+    border: 3px solid $dark
+
+  .hyperlink
+    color: $primary
+    text-decoration: underline
+    cursor: pointer
+    // Without this, the underline extends into the space for some reason
+    // solution source: https://stackoverflow.com/questions/23182904/css-underline-text-but-ignore-the-spaces
+    display: inline-block
+
+.is-beta
+  border: 1px solid $warning
+  border-radius: 10px
+  margin: 0 auto 1rem
+  max-width: 750px
+  padding: 0.75rem
+
+.container
+  margin: 0 auto
+  max-width: 500px
