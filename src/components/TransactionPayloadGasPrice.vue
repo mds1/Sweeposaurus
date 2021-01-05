@@ -36,7 +36,7 @@ function useGasPrice() {
 
   async function getGasPrice(): Promise<BigNumber> {
     const rawGasPrice = await (signer.value as Signer).getGasPrice();
-    return rawGasPrice.mul('2');
+    return rawGasPrice.mul('3').div('2');
   }
 
   function setGasPrice() {

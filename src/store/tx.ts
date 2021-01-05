@@ -7,7 +7,7 @@ import { BigNumberish, BytesLike } from 'components/models';
  */
 
 // State ===========================================================================================
-const to = ref<string>();
+const to = ref<string>('');
 const nonce = ref<number>();
 const gasLimit = ref<BigNumberish>(ethers.BigNumber.from('21000'));
 const gasPrice = ref<BigNumberish>();
