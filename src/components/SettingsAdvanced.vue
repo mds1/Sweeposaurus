@@ -10,7 +10,7 @@
     <div
       v-show="showAdvanced"
       class="row justify-center q-mt-lg"
-      style="max-width: 800px; margin-left: auto; margin-right: auto;"
+      style="max-width: 800px; margin-left: auto; margin-right: auto"
     >
       <settings-container setting-name="Nonce" class="card-border-no-hover col-xs-4 q-mx-sm">
         <transaction-payload-nonce />

@@ -1,8 +1,8 @@
 <template>
   <div>
     <q-checkbox v-model="buyBeer" size="sm" @input="setTxPayload">
-      <span style="font-size: 1rem;">Buy me a beer</span>
-      <span class="q-ml-sm" style="font-size: 1.1rem;">🍺</span>
+      <span style="font-size: 1rem">Buy me a beer</span>
+      <span class="q-ml-sm" style="font-size: 1.1rem">🍺</span>
     </q-checkbox>
     <div class="text-caption">
       <span>
@@ -12,13 +12,11 @@
           dense
           input-class="text-center text-caption"
           step="0.001"
-          style="max-width: 50px; display: inline-block;"
+          style="max-width: 50px; display: inline-block"
           type="number"
           @input="setTxPayload"
         />&nbsp;ETH
-        <span v-if="ethUsdPrice !== 0">
-          (about ${{ Math.round(Number(ethUsdPrice * beerPrice)) }})
-        </span>
+        <span v-if="ethUsdPrice !== 0"> (about ${{ Math.round(Number(ethUsdPrice * beerPrice)) }}) </span>
         to the developer as part of the cancellation
       </span>
     </div>
@@ -43,9 +41,7 @@ function useDonationData() {
     const donationAddress = '0x3a9bE12aB20Ef966f35325763C21EAa764D639C3';
     const isDonating = buyBeer.value && beerPrice.value > 0; // make sure checkbox is ticked and amount is above zero
     const recipient = isDonating ? donationAddress : userAddress.value;
-    const amount = isDonating
-      ? ethers.utils.parseEther(String(beerPrice.value))
-      : ethers.constants.Zero;
+    const amount = isDonating ? ethers.utils.parseEther(String(beerPrice.value)) : ethers.constants.Zero;
     setTxValue(amount);
     setTxTo(String(recipient));
   }

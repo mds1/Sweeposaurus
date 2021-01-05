@@ -2,37 +2,39 @@
   <q-page padding class="text-center">
     <div>
       <!-- Header section -->
-      <div class="text-h4">
-        Cancel Transaction
-      </div>
-      <div class="q-mb-md">
-        Simply click the button below
-      </div>
+      <div class="text-h4">Sweep tokens</div>
+      <!-- <div class="q-mb-md">Simply click the button below</div> -->
     </div>
 
-    <!-- Advanced settings -->
-    <settings-advanced />
+    <div v-if="isLoading">
+      <q-spinner-puff class="q-mt-xl" color="primary" size="5em" />
+      <p class="text-caption text-italic q-mt-md">Scanning for tokens in your wallet. This may take a minute...</p>
+    </div>
+    <div v-else>
+      <!-- Advanced settings -->
+      <settings-advanced />
 
-    <!-- Cancel button -->
-    <img class="cancel-button q-my-lg" src="~assets/easy-button.png" @click="cancelTransaction" />
+      <!-- Cancel button -->
+      <img class="cancel-button q-my-lg" src="~assets/easy-button.png" @click="cancelTransaction" />
 
-    <!-- Donation section -->
-    <transaction-payload-donation v-if="!isLoading" />
+      <!-- Donation section -->
+      <transaction-payload-donation v-if="!isLoading" />
 
-    <!-- Transaction status -->
-    <div v-if="isLoading" class="q-mt-xl">
-      <q-icon class="text-gradient" name="fas fa-circle-notch fa-spin" size="3rem" />
-      <div class="text-italic q-mt-md">Your transaction is processing...</div>
-      <div class="text-caption">
-        View on
-        <a :href="etherscanUrl" target="_blank" class="hyperlink">Etherscan</a>
+      <!-- Transaction status -->
+      <div v-if="isLoading" class="q-mt-xl">
+        <q-icon class="text-gradient" name="fas fa-circle-notch fa-spin" size="3rem" />
+        <div class="text-italic q-mt-md">Your transaction is processing...</div>
+        <div class="text-caption">
+          View on
+          <a :href="etherscanUrl" target="_blank" class="hyperlink">Etherscan</a>
+        </div>
       </div>
     </div>
   </q-page>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from '@vue/composition-api';
+import { computed, defineComponent, onMounted, ref } from '@vue/composition-api';
 import SettingsAdvanced from 'components/SettingsAdvanced.vue';
 
 import TransactionPayloadDonation from 'components/TransactionPayloadDonation.vue';
@@ -44,13 +46,23 @@ import { Signer, TransactionResponse, Window } from 'components/models';
 
 declare let window: Window;
 
-function useCancelTransaction() {
+function useSweeper() {
   const { notifyUser, showError } = useAlerts();
-  const { signer } = useWalletStore();
+  const { userAddress, signer } = useWalletStore();
 
   const txHash = ref('');
-  const isLoading = ref(false);
+  const isLoading = ref(true);
   const etherscanUrl = computed(() => `https://etherscan.io/tx/${txHash.value}`);
+
+  onMounted(() => {
+    isLoading.value = true;
+    scan(userAddress.value as string);
+    isLoading.value = false;
+  });
+
+  function scan(userAddress: string) {
+    return 123;
+  }
 
   /**
    * @notice Cancels pending transaction
@@ -100,7 +112,7 @@ function useCancelTransaction() {
 }
 
 export default defineComponent({
-  name: 'PageTransactionCancel',
+  name: 'PageSweep',
 
   components: {
     SettingsAdvanced,
@@ -108,7 +120,7 @@ export default defineComponent({
   },
 
   setup() {
-    return { ...useCancelTransaction() };
+    return { ...useSweeper() };
   },
 });
 </script>

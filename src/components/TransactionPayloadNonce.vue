@@ -23,7 +23,7 @@
       dense
       filled
       label="Nonce"
-      style="max-width: 100px; display: inline-block;"
+      style="max-width: 100px; display: inline-block"
       type="number"
       @input="setNonce"
     />

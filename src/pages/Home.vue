@@ -1,30 +1,16 @@
 <template>
   <q-page padding class="text-center">
     <div>
-      What would you like to do?
+      Connect a wallet to get started
       <div class="row justify-center q-mt-lg">
         <!-- Cancel Transaction -->
         <q-card class="card-border col-xs-4 col-sm-3 col-md-2 q-py-md q-mr-md">
-          <connect-wallet redirect-to="cancel">
+          <connect-wallet redirect-to="sweep">
             <q-card-section>
-              <img src="~assets/fa-trash.png" style="height: 3rem;" />
+              <q-icon name="fas fa-wallet" class="text-primary" style="font-size: 3rem" />
             </q-card-section>
             <q-card-section>
-              <span style="font-size: 1.1rem;"> Cancel </span>
-              <br /><span>Transaction</span>
-            </q-card-section>
-          </connect-wallet>
-        </q-card>
-
-        <!-- Speed up transaction -->
-        <q-card class="card-border col-xs-4 col-sm-3 col-md-2 q-py-md q-ml-md">
-          <connect-wallet redirect-to="speedUp">
-            <q-card-section>
-              <img src="~assets/fa-speedometer.png" style="height: 3rem;" />
-            </q-card-section>
-            <q-card-section>
-              <span style="font-size: 1.1rem;"> Speed Up </span>
-              <br /><span>Transaction</span>
+              <span style="font-size: 1.1rem"> Connect Wallet </span>
             </q-card-section>
           </connect-wallet>
         </q-card>

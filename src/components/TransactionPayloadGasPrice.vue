@@ -7,7 +7,7 @@
       dense
       filled
       label="Gas price"
-      style="max-width: 100px; display: inline-block;"
+      style="max-width: 100px; display: inline-block"
       type="number"
       @input="setGasPrice"
     />
