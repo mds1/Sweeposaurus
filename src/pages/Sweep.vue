@@ -35,8 +35,10 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref } from '@vue/composition-api';
-import SettingsAdvanced from 'components/SettingsAdvanced.vue';
+import { ethers } from 'ethers';
+import { TokenInfo } from '@uniswap/token-lists';
 
+import SettingsAdvanced from 'components/SettingsAdvanced.vue';
 import TransactionPayloadDonation from 'components/TransactionPayloadDonation.vue';
 
 import useAlerts from 'src/utils/alerts';
@@ -46,22 +48,60 @@ import { Signer, TransactionResponse, Window } from 'components/models';
 
 declare let window: Window;
 
+interface TokenDetails extends TokenInfo {
+  balance: ethers.BigNumber;
+}
+
 function useSweeper() {
   const { notifyUser, showError } = useAlerts();
   const { userAddress, signer } = useWalletStore();
 
+  const balances = ref<TokenDetails[]>([]);
   const txHash = ref('');
   const isLoading = ref(true);
   const etherscanUrl = computed(() => `https://etherscan.io/tx/${txHash.value}`);
 
-  onMounted(() => {
+  onMounted(async () => {
     isLoading.value = true;
-    scan(userAddress.value as string);
+    await scan(userAddress.value as string);
     isLoading.value = false;
   });
 
-  function scan(userAddress: string) {
-    return 123;
+  async function fetchTokenList() {
+    const jsonFetch = (url: string) => fetch(url).then((res) => res.json());
+    const url = 'https://tokens.coingecko.com/uniswap/all.json';
+    const response = await jsonFetch(url);
+    return response.tokens as TokenInfo[];
+  }
+
+  async function scan(userAddress: string) {
+    // Get token list
+    const tokenList = await fetchTokenList();
+
+    // Get Multicall instance
+    // prettier-ignore
+    const multicallAbi = [ { constant: false, inputs: [ { components: [ { internalType: 'address', name: 'target', type: 'address' }, { internalType: 'bytes', name: 'callData', type: 'bytes' }, ], internalType: 'struct Multicall.Call[]', name: 'calls', type: 'tuple[]', }, ], name: 'aggregate', outputs: [ { internalType: 'uint256', name: 'blockNumber', type: 'uint256' }, { internalType: 'bytes[]', name: 'returnData', type: 'bytes[]' }, ], payable: false, stateMutability: 'nonpayable', type: 'function', }, { constant: true, inputs: [{ internalType: 'uint256', name: 'blockNumber', type: 'uint256' }], name: 'getBlockHash', outputs: [{ internalType: 'bytes32', name: 'blockHash', type: 'bytes32' }], payable: false, stateMutability: 'view', type: 'function', }, { constant: true, inputs: [], name: 'getCurrentBlockCoinbase', outputs: [{ internalType: 'address', name: 'coinbase', type: 'address' }], payable: false, stateMutability: 'view', type: 'function', }, { constant: true, inputs: [], name: 'getCurrentBlockDifficulty', outputs: [{ internalType: 'uint256', name: 'difficulty', type: 'uint256' }], payable: false, stateMutability: 'view', type: 'function', }, { constant: true, inputs: [], name: 'getCurrentBlockGasLimit', outputs: [{ internalType: 'uint256', name: 'gaslimit', type: 'uint256' }], payable: false, stateMutability: 'view', type: 'function', }, { constant: true, inputs: [], name: 'getCurrentBlockTimestamp', outputs: [{ internalType: 'uint256', name: 'timestamp', type: 'uint256' }], payable: false, stateMutability: 'view', type: 'function', }, { constant: true, inputs: [{ internalType: 'address', name: 'addr', type: 'address' }], name: 'getEthBalance', outputs: [{ internalType: 'uint256', name: 'balance', type: 'uint256' }], payable: false, stateMutability: 'view', type: 'function', }, { constant: true, inputs: [], name: 'getLastBlockHash', outputs: [{ internalType: 'bytes32', name: 'blockHash', type: 'bytes32' }], payable: false, stateMutability: 'view', type: 'function', } ];
+    const multicallAddress = '0x5e227AD1969Ea493B43F840cfF78d08a6fc17796';
+    const multicall = new ethers.Contract(multicallAddress, multicallAbi, signer.value);
+
+    // Generate balance calls
+    // prettier-ignore
+    const erc20Abi = [ { constant: true, inputs: [], name: 'name', outputs: [ { name: '', type: 'string', }, ], payable: false, stateMutability: 'view', type: 'function', }, { constant: false, inputs: [ { name: '_spender', type: 'address', }, { name: '_value', type: 'uint256', }, ], name: 'approve', outputs: [ { name: '', type: 'bool', }, ], payable: false, stateMutability: 'nonpayable', type: 'function', }, { constant: true, inputs: [], name: 'totalSupply', outputs: [ { name: '', type: 'uint256', }, ], payable: false, stateMutability: 'view', type: 'function', }, { constant: false, inputs: [ { name: '_from', type: 'address', }, { name: '_to', type: 'address', }, { name: '_value', type: 'uint256', }, ], name: 'transferFrom', outputs: [ { name: '', type: 'bool', }, ], payable: false, stateMutability: 'nonpayable', type: 'function', }, { constant: true, inputs: [], name: 'decimals', outputs: [ { name: '', type: 'uint8', }, ], payable: false, stateMutability: 'view', type: 'function', }, { constant: true, inputs: [ { name: '_owner', type: 'address', }, ], name: 'balanceOf', outputs: [ { name: 'balance', type: 'uint256', }, ], payable: false, stateMutability: 'view', type: 'function', }, { constant: true, inputs: [], name: 'symbol', outputs: [ { name: '', type: 'string', }, ], payable: false, stateMutability: 'view', type: 'function', }, { constant: false, inputs: [ { name: '_to', type: 'address', }, { name: '_value', type: 'uint256', }, ], name: 'transfer', outputs: [ { name: '', type: 'bool', }, ], payable: false, stateMutability: 'nonpayable', type: 'function', }, { constant: true, inputs: [ { name: '_owner', type: 'address', }, { name: '_spender', type: 'address', }, ], name: 'allowance', outputs: [ { name: '', type: 'uint256', }, ], payable: false, stateMutability: 'view', type: 'function', }, { payable: true, stateMutability: 'payable', type: 'fallback', }, { anonymous: false, inputs: [ { indexed: true, name: 'owner', type: 'address', }, { indexed: true, name: 'spender', type: 'address', }, { indexed: false, name: 'value', type: 'uint256', }, ], name: 'Approval', type: 'event', }, { anonymous: false, inputs: [ { indexed: true, name: 'from', type: 'address', }, { indexed: true, name: 'to', type: 'address', }, { indexed: false, name: 'value', type: 'uint256', }, ], name: 'Transfer', type: 'event', } ];
+    const calls = tokenList.map((token) => {
+      const { address: tokenAddress } = token;
+      const tokenContract = new ethers.Contract(tokenAddress, erc20Abi, signer.value);
+      return { target: tokenAddress, callData: tokenContract.interface.encodeFunctionData('balanceOf', [userAddress]) };
+    });
+
+    // Send call
+    const balanceResponses = (await multicall.callStatic.aggregate(calls)).returnData as string[];
+
+    // Create array of all tokens with their balance and only keep nonzero ones
+    balances.value = tokenList
+      .map((token, index) => ({ ...token, balance: ethers.BigNumber.from(balanceResponses[index]) }))
+      .filter((token) => token.balance.gt(ethers.constants.Zero))
+      .sort((token1, token2) => token1.symbol.localeCompare(token2.symbol));
+    console.log('balances: ', balances.value);
   }
 
   /**

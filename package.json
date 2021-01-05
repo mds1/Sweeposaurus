@@ -21,6 +21,7 @@
   "dependencies": {
     "@quasar/extras": "^1.0.0",
     "@unilogin/provider": "^0.6.1",
+    "@uniswap/token-lists": "^1.0.0-beta.19",
     "@vue/composition-api": "^1.0.0-beta.22",
     "bnc-onboard": "^1.12.0",
     "core-js": "^3.6.5",
