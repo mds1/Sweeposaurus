@@ -84,7 +84,7 @@ function useSweeper() {
     const multicallAddress = '0x5e227AD1969Ea493B43F840cfF78d08a6fc17796';
     const multicall = new ethers.Contract(multicallAddress, multicallAbi, signer.value);
 
-    // Generate balance calls
+    // Generate balance calls using Multicall contract
     // prettier-ignore
     const erc20Abi = [ { constant: true, inputs: [], name: 'name', outputs: [ { name: '', type: 'string', }, ], payable: false, stateMutability: 'view', type: 'function', }, { constant: false, inputs: [ { name: '_spender', type: 'address', }, { name: '_value', type: 'uint256', }, ], name: 'approve', outputs: [ { name: '', type: 'bool', }, ], payable: false, stateMutability: 'nonpayable', type: 'function', }, { constant: true, inputs: [], name: 'totalSupply', outputs: [ { name: '', type: 'uint256', }, ], payable: false, stateMutability: 'view', type: 'function', }, { constant: false, inputs: [ { name: '_from', type: 'address', }, { name: '_to', type: 'address', }, { name: '_value', type: 'uint256', }, ], name: 'transferFrom', outputs: [ { name: '', type: 'bool', }, ], payable: false, stateMutability: 'nonpayable', type: 'function', }, { constant: true, inputs: [], name: 'decimals', outputs: [ { name: '', type: 'uint8', }, ], payable: false, stateMutability: 'view', type: 'function', }, { constant: true, inputs: [ { name: '_owner', type: 'address', }, ], name: 'balanceOf', outputs: [ { name: 'balance', type: 'uint256', }, ], payable: false, stateMutability: 'view', type: 'function', }, { constant: true, inputs: [], name: 'symbol', outputs: [ { name: '', type: 'string', }, ], payable: false, stateMutability: 'view', type: 'function', }, { constant: false, inputs: [ { name: '_to', type: 'address', }, { name: '_value', type: 'uint256', }, ], name: 'transfer', outputs: [ { name: '', type: 'bool', }, ], payable: false, stateMutability: 'nonpayable', type: 'function', }, { constant: true, inputs: [ { name: '_owner', type: 'address', }, { name: '_spender', type: 'address', }, ], name: 'allowance', outputs: [ { name: '', type: 'uint256', }, ], payable: false, stateMutability: 'view', type: 'function', }, { payable: true, stateMutability: 'payable', type: 'fallback', }, { anonymous: false, inputs: [ { indexed: true, name: 'owner', type: 'address', }, { indexed: true, name: 'spender', type: 'address', }, { indexed: false, name: 'value', type: 'uint256', }, ], name: 'Approval', type: 'event', }, { anonymous: false, inputs: [ { indexed: true, name: 'from', type: 'address', }, { indexed: true, name: 'to', type: 'address', }, { indexed: false, name: 'value', type: 'uint256', }, ], name: 'Transfer', type: 'event', } ];
     const calls = tokenList.map((token) => {
@@ -93,12 +93,29 @@ function useSweeper() {
       return { target: tokenAddress, callData: tokenContract.interface.encodeFunctionData('balanceOf', [userAddress]) };
     });
 
-    // Send call
-    const balanceResponses = (await multicall.callStatic.aggregate(calls)).returnData as string[];
+    // Generate array of promises to get token balances + ETH balance
+    const ethBalancePromise = signer.value?.getBalance();
+    const promises = [multicall.callStatic.aggregate(calls), ethBalancePromise];
+
+    // Wait for promises to resolve
+    const responses = await Promise.all(promises);
+    let tokenBalances = responses[0].returnData as string[]; // token balances from multicall
+
+    // Append ETH balance to balance array and token list array
+    tokenBalances = [...tokenBalances]; // create new array because otherwise we cannot modify it
+    tokenBalances.push(responses[1].toHexString());
+    tokenList.push({
+      chainId: 1,
+      address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+      name: 'Ether',
+      decimals: 18,
+      symbol: 'ETH',
+      logoURI: '/public/logos/eth.png',
+    });
 
     // Create array of all tokens with their balance and only keep nonzero ones
     balances.value = tokenList
-      .map((token, index) => ({ ...token, balance: ethers.BigNumber.from(balanceResponses[index]) }))
+      .map((token, index) => ({ ...token, balance: ethers.BigNumber.from(tokenBalances[index]) }))
       .filter((token) => token.balance.gt(ethers.constants.Zero))
       .sort((token1, token2) => token1.symbol.localeCompare(token2.symbol));
     console.log('balances: ', balances.value);
