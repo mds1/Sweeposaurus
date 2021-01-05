@@ -1,12 +1,12 @@
 <template>
-  <div>
+  <div class="text-left">
     <q-checkbox v-model="buyBeer" size="sm" @input="setTxPayload">
       <span style="font-size: 1rem">Buy me a beer</span>
       <span class="q-ml-sm" style="font-size: 1.1rem">🍺</span>
     </q-checkbox>
     <div class="text-caption">
       <span>
-        Sends&nbsp;
+        Send one extra transfer of&nbsp;
         <q-input
           v-model.number="beerPrice"
           dense
@@ -17,7 +17,7 @@
           @input="setTxPayload"
         />&nbsp;ETH
         <span v-if="ethUsdPrice !== 0"> (about ${{ Math.round(Number(ethUsdPrice * beerPrice)) }}) </span>
-        to the developer as part of the cancellation
+        to the developer
       </span>
     </div>
   </div>

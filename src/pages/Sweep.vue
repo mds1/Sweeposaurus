@@ -10,24 +10,88 @@
       <q-spinner-puff class="q-mt-xl" color="primary" size="5em" />
       <p class="text-caption text-italic q-mt-md">Scanning for tokens in your wallet. This may take a minute...</p>
     </div>
-    <div v-else>
+
+    <div v-else style="margin: 0 auto; max-width: 800px">
       <!-- Advanced settings -->
-      <settings-advanced />
+      <div>
+        <h5 class="text-left q-mb-xs">Step 1: Enter recipient address</h5>
+        <div class="text-left">Optionally, you can override the default gas price.</div>
+        <settings-advanced />
+      </div>
 
-      <!-- Cancel button -->
-      <img class="cancel-button q-my-lg" src="~assets/easy-button.png" @click="cancelTransaction" />
+      <!-- Token table -->
+      <div class="q-my-xl">
+        <h5 class="text-left q-mb-xs">Step 2: Choose tokens to send</h5>
+        <div class="text-left">
+          To send the max amount, leave the value untouched. To send nothing, set the value to 0.
+        </div>
+        <div class="text-left text-caption text-grey">
+          If you have a lot of tokens, this will be a long table&mdash;just keep scrolling for step 3!
+        </div>
+        <q-table
+          class="q-mt-md"
+          title="Tokens"
+          :data="balances"
+          :columns="tableColumns"
+          :pagination="{ rowsPerPage: balances.length }"
+          row-key="address"
+        >
+          <!-- Header labels -->
+          <template #header="props">
+            <q-tr :props="props">
+              <q-th v-for="col in props.cols" :key="col.name" :props="props">
+                {{ col.label }}
+              </q-th>
+              <q-th auto-width />
+            </q-tr>
+          </template>
 
+          <!-- Token name -->
+          <template #body-cell-symbol="props">
+            <q-td :props="props">
+              <div class="row justify-start items-center">
+                <img class="col-auto q-mr-md" :src="props.row.logoURI" style="width: 2rem" />
+                <div class="col-auto">
+                  <div>{{ props.value }}</div>
+                  <div class="text-caption text-grey">{{ props.row.name }}</div>
+                </div>
+              </div>
+            </q-td>
+          </template>
+
+          <!-- Token balance -->
+          <template #body-cell-balance="props">
+            <q-td :props="props">
+              <div>{{ formatBalance(props.value, props.row.decimals) }}</div>
+            </q-td>
+          </template>
+
+          <!-- Amounts to send -->
+          <template #body-cell-amount="props">
+            <q-td :props="props">
+              <q-input
+                v-model="balances[props.pageIndex].amountToSend"
+                dense
+                filled
+                :mask="
+                  balances[props.pageIndex].amountToSend === 'max'
+                    ? formatBalance(props.row.balance, props.row.decimals)
+                    : undefined
+                "
+              />
+            </q-td>
+          </template>
+        </q-table>
+      </div>
+
+      <h5 class="text-left q-mb-xs">Step 3: Consider donating</h5>
       <!-- Donation section -->
       <transaction-payload-donation v-if="!isLoading" />
 
-      <!-- Transaction status -->
-      <div v-if="isLoading" class="q-mt-xl">
-        <q-icon class="text-gradient" name="fas fa-circle-notch fa-spin" size="3rem" />
-        <div class="text-italic q-mt-md">Your transaction is processing...</div>
-        <div class="text-caption">
-          View on
-          <a :href="etherscanUrl" target="_blank" class="hyperlink">Etherscan</a>
-        </div>
+      <div class="text-left">
+        <h5 class="q-mb-xs">Step 4: Send tokens!</h5>
+        <div>You will have to approve one transaction for each transfer.</div>
+        <q-btn class="q-my-lg" color="primary" label="Send" @click="send" />
       </div>
     </div>
   </q-page>
@@ -52,9 +116,13 @@ function useSweeper() {
   const { notifyUser, handleError } = useAlerts();
   const { balances, scan, signer } = useWalletStore();
 
-  const txHash = ref('');
   const isLoading = ref(true);
-  const etherscanUrl = computed(() => `https://etherscan.io/tx/${txHash.value}`);
+
+  const tableColumns = [
+    { align: 'left', name: 'symbol', label: 'Asset', sortable: true, field: 'symbol' },
+    { align: 'left', name: 'balance', label: 'Balance', sortable: true, field: 'balance' },
+    { align: 'left', name: 'amount', label: 'Amount to Send', sortable: true, field: 'amount' },
+  ];
 
   onMounted(async () => {
     isLoading.value = true;
@@ -63,50 +131,61 @@ function useSweeper() {
     console.log('balances: ', balances.value);
   });
 
+  function formatBalance(value: string, decimals: string) {
+    return Number(ethers.utils.formatUnits(value, decimals)).toLocaleString(undefined, {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 8,
+    });
+  }
+
   /**
-   * @notice Cancels pending transaction
+   * @notice Sends all transfers
    */
-  async function cancelTransaction() {
-    try {
-      const { txPayload } = useTxStore();
+  function send() {
+    for (let i = 0; i < balances.value.length; i += 1) {
+      try {
+        const tokenDetails = balances.value[i];
+        console.log('tokenDetails: ', tokenDetails);
 
-      const tx: TransactionResponse = await (signer.value as Signer).sendTransaction({
-        to: txPayload.value.to,
-        nonce: txPayload.value.nonce,
-        gasLimit: txPayload.value.gasLimit,
-        gasPrice: txPayload.value.gasPrice,
-        value: txPayload.value.value,
-      });
+        // const { txPayload } = useTxStore();
 
-      isLoading.value = true;
-      txHash.value = String(tx.hash);
-      console.log('Transaction sent', tx);
+        // const tx: TransactionResponse = await (signer.value as Signer).sendTransaction({
+        //   to: txPayload.value.to,
+        //   nonce: txPayload.value.nonce,
+        //   gasLimit: txPayload.value.gasLimit,
+        //   gasPrice: txPayload.value.gasPrice,
+        //   value: txPayload.value.value,
+        // });
 
-      // const t = setInterval(function () {
-      //   if (window.goatcounter && window.goatcounter.count) {
-      //     clearInterval(t);
-      //     window.goatcounter.count({
-      //       path: 'transaction-cancelled-2',
-      //       event: true,
-      //     });
-      //   }
-      // }, 100);
+        // isLoading.value = true;
 
-      await tx.wait();
-      console.log('Transaction mined!');
-      notifyUser('positive', 'Your cancellation was successful!');
-      isLoading.value = false;
-    } catch (e) {
-      handleError(e);
-      isLoading.value = false;
+        // const t = setInterval(function () {
+        //   if (window.goatcounter && window.goatcounter.count) {
+        //     clearInterval(t);
+        //     window.goatcounter.count({
+        //       path: 'transaction-cancelled-2',
+        //       event: true,
+        //     });
+        //   }
+        // }, 100);
+
+        // await tx.wait();
+        // console.log('Transaction mined!');
+        // notifyUser('positive', 'Your cancellation was successful!');
+        // isLoading.value = false;
+      } catch (e) {
+        handleError(e);
+        isLoading.value = false;
+      }
     }
   }
 
   return {
-    cancelTransaction,
-    txHash,
+    balances,
+    formatBalance,
+    tableColumns,
     isLoading,
-    etherscanUrl,
+    send,
   };
 }
 

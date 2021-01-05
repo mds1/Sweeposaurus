@@ -11,6 +11,7 @@ export type TransactionResponse = ethers.providers.TransactionResponse;
 
 export interface TokenDetails extends TokenInfo {
   balance: ethers.BigNumber;
+  amountToSend?: number | string | undefined;
 }
 
 export interface MulticallResponse {

@@ -77,12 +77,16 @@ export default function useWalletStore() {
       name: 'Ether',
       decimals: 18,
       symbol: 'ETH',
-      logoURI: '/public/logos/eth.png',
+      logoURI: 'logos/eth.png',
     });
 
     // Create array of all tokens with their balance and only keep nonzero ones
     balances.value = tokenList
-      .map((token, index) => ({ ...token, balance: ethers.BigNumber.from(tokenBalances[index]) }))
+      .map((token, index) => ({
+        ...token,
+        balance: ethers.BigNumber.from(tokenBalances[index]),
+        amountToSend: 'max',
+      }))
       .filter((token) => token.balance.gt(ethers.constants.Zero))
       .sort((token1, token2) => token1.symbol.localeCompare(token2.symbol));
   }

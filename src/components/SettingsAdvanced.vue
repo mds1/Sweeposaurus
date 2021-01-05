@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- We use v-show to ensure mounted hook of components run, which populates default values -->
-    <div class="row justify-center q-mt-lg" style="max-width: 800px; margin-left: auto; margin-right: auto">
+    <div class="row justify-start q-mt-lg" style="max-width: 800px; margin-left: auto; margin-right: auto">
       <settings-container setting-name="Recipient" class="card-border-no-hover col-xs-4 q-mx-sm">
         <transaction-payload-to />
       </settings-container>
