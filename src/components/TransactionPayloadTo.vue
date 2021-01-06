@@ -14,10 +14,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from '@vue/composition-api';
+import { defineComponent, ref } from '@vue/composition-api';
 import useTxStore from 'src/store/tx';
-import useWalletStore from 'src/store/wallet';
-import { Signer } from 'components/models';
 
 function useRecipient() {
   const to = ref('');

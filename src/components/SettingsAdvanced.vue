@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from '@vue/composition-api';
+import { defineComponent } from '@vue/composition-api';
 import SettingsContainer from 'components/SettingsContainer.vue';
 import TransactionPayloadGasPrice from 'components/TransactionPayloadGasPrice.vue';
 import TransactionPayloadTo from 'components/TransactionPayloadTo.vue';

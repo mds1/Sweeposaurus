@@ -105,9 +105,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from '@vue/composition-api';
+import { defineComponent, onMounted, ref } from '@vue/composition-api';
 import { ethers } from 'ethers';
-import { TokenInfo } from '@uniswap/token-lists';
 
 import SettingsAdvanced from 'components/SettingsAdvanced.vue';
 import TransactionPayloadDonation from 'components/TransactionPayloadDonation.vue';
@@ -117,7 +116,7 @@ import useAlerts from 'src/utils/alerts';
 import useAnalytics from 'src/utils/analytics';
 import useWalletStore from 'src/store/wallet';
 import useTxStore from 'src/store/tx';
-import { Signer, TransactionResponse } from 'components/models';
+import { TransactionResponse } from 'components/models';
 
 function useSweeper() {
   const { notifyUser, handleError } = useAlerts();

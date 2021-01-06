@@ -27,12 +27,10 @@
 import { defineComponent, onMounted, ref } from '@vue/composition-api';
 import { ethers } from 'ethers';
 import useTxStore from 'src/store/tx';
-import useWalletStore from 'src/store/wallet';
 import useEthUsdPrice from 'src/utils/ethUsdPrice';
 
 function useDonationData() {
-  const { userAddress } = useWalletStore();
-  const { setTxTo, setTxValue } = useTxStore();
+  const { setTxValue } = useTxStore();
 
   const buyBeer = ref(true);
   const beerPrice = ref(0.005); // in ETH
