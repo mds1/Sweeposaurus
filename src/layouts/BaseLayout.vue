@@ -6,7 +6,7 @@
           <!-- Logo and nav bar -->
           <div class="row justify-start items-center">
             <router-link class="col-auto" tag="div" :to="{ name: 'home' }" style="line-height: 0">
-              <img alt="Ethereum logo" src="~assets/app-icon.png" style="max-width: 50px" />
+              <img alt="Ethereum logo" src="~assets/app-icon.png" style="max-width: 40px" />
             </router-link>
 
             <router-link

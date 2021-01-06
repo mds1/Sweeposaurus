@@ -1,8 +1,15 @@
 <template>
   <q-page padding class="text-center">
     <div>
-      Connect a wallet to get started
-      <div class="row justify-center q-mt-lg">
+      <div class="row justify-center items-center">
+        <img class="col-auto q-mr-md" alt="Sweeposaurus logo" src="~assets/app-logo.png" style="max-width: 10rem" />
+        <div class="col-auto text-left">
+          <div style="font-size: 1.1rem">Say hello to</div>
+          <h1 class="q-my-none">Sweeposaurus</h1>
+          <div>He'll make it easy to sweep all your tokens to a new address!</div>
+        </div>
+      </div>
+      <div class="row justify-center q-mt-xl">
         <!-- Cancel Transaction -->
         <q-card class="card-border col-xs-4 col-sm-3 col-md-2 q-py-md q-mr-md">
           <connect-wallet redirect-to="sweep">

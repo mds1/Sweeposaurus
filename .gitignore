@@ -4,6 +4,9 @@
 .thumbs.db
 node_modules
 
+# file used to make logo
+*.pptx
+
 # Quasar core related directories
 .quasar
 /dist

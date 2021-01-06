@@ -2,7 +2,10 @@
   <q-page padding class="text-center">
     <div>
       <!-- Header section -->
-      <div class="text-h4">Sweep tokens</div>
+      <h4 class="row justify-center items-center">
+        <img class="col-auto q-mr-md" alt="Sweeposaurus logo" src="~assets/app-logo.png" style="max-width: 7rem" />
+        <div class="col-auto">Sweep tokens</div>
+      </h4>
       <!-- <div class="q-mb-md">Simply click the button below</div> -->
     </div>
 
