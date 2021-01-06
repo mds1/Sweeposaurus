@@ -113,9 +113,9 @@ module.exports = configure(function (ctx) {
       workboxPluginMode: 'GenerateSW', // 'GenerateSW' or 'InjectManifest'
       workboxOptions: {}, // only for GenerateSW
       manifest: {
-        name: 'Cancel Ethereum Transactions',
-        short_name: 'Cancel Ethereum Transactions',
-        description: 'The easiest way to cancel pending transactions on Ethereum',
+        name: 'Sweeposaurus',
+        short_name: 'Sweeposaurus',
+        description: 'Sweep all of your tokens to another address',
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#ffffff',
@@ -178,7 +178,7 @@ module.exports = configure(function (ctx) {
       builder: {
         // https://www.electron.build/configuration/configuration
 
-        appId: 'cancel-eth-transactions',
+        appId: 'sweeposaurus',
       },
 
       // More info: https://quasar.dev/quasar-cli/developing-electron-apps/node-integration

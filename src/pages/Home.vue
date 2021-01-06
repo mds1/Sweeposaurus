@@ -10,7 +10,6 @@
         </div>
       </div>
       <div class="row justify-center q-mt-xl">
-        <!-- Cancel Transaction -->
         <q-card class="card-border col-xs-4 col-sm-3 col-md-2 q-py-md q-mr-md">
           <connect-wallet redirect-to="sweep">
             <q-card-section>

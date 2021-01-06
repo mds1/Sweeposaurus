@@ -1,5 +1,12 @@
 <template>
   <q-page padding class="text-center">
+    <!--
+      CURRENTLY OUTDATED
+
+      This contains the help content from cancel-ethereum-transactions, and the help menu bar item
+      was hidden. After some user feedback and questions come in, we can add the help page back
+      and update the content here accordingly
+    -->
     <div class="text-h4 q-mb-lg">Help</div>
 
     <q-list class="container text-left" separator>
