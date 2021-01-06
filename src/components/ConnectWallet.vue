@@ -69,7 +69,7 @@ function useWallet(context: SetupContext, redirectTo: string) {
     const onboard = Onboard({
       dappId: process.env.BLOCKNATIVE_API_KEY,
       darkMode: Dark.isActive,
-      networkId: process.env.DEV ? 3 : 1, // Ropsten in dev, mainnet in production
+      networkId: 1,
       walletSelect: {
         wallets: wallets,
       },
