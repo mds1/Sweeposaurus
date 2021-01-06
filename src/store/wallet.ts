@@ -4,6 +4,7 @@ import { TokenList } from '@uniswap/token-lists';
 import { MulticallResponse, Signer, Provider, TokenDetails } from 'components/models';
 import multicallInfo from 'src/contracts/multicall.json';
 import erc20 from 'src/contracts/erc20.json';
+import useAnalytics from 'src/utils/analytics';
 
 /**
  * State is handled in reusable components, where each component is its own self-contained
@@ -39,6 +40,9 @@ export default function useWalletStore() {
   }
 
   async function scan() {
+    const { logEvent } = useAnalytics();
+    logEvent('scan-started');
+
     // Get token list
     const tokenList = await fetchTokenList();
 

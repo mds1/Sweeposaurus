@@ -110,18 +110,16 @@ import TransactionPayloadDonation from 'components/TransactionPayloadDonation.vu
 
 import erc20 from 'src/contracts/erc20.json';
 import useAlerts from 'src/utils/alerts';
+import useAnalytics from 'src/utils/analytics';
 import useWalletStore from 'src/store/wallet';
 import useTxStore from 'src/store/tx';
-import { Signer, TransactionResponse, Window } from 'components/models';
-
-declare let window: Window;
+import { Signer, TransactionResponse } from 'components/models';
 
 function useSweeper() {
   const { notifyUser, handleError } = useAlerts();
   const { balances, scan, signer } = useWalletStore();
 
   const isLoading = ref(true);
-
   const tableColumns = [
     { align: 'left', name: 'symbol', label: 'Asset', sortable: true, field: 'symbol' },
     { align: 'left', name: 'balance', label: 'Balance', sortable: true, field: 'balance' },
@@ -146,10 +144,13 @@ function useSweeper() {
    */
   async function send() {
     const { txPayload } = useTxStore();
+    const { logEvent } = useAnalytics();
     const { to, gasPrice, value } = txPayload.value; // txPayload.value.value is donation amount
     const { BigNumber } = ethers;
 
     if (!to) throw new Error('Please specify a recipient address in Step 1');
+
+    logEvent('send-started');
 
     for (let i = 0; i < balances.value.length; i += 1) {
       try {
@@ -216,16 +217,7 @@ function useSweeper() {
           })) as ethers.providers.TransactionResponse;
         }
 
-        // const t = setInterval(function () {
-        //   if (window.goatcounter && window.goatcounter.count) {
-        //     clearInterval(t);
-        //     window.goatcounter.count({
-        //       path: 'transaction-cancelled-2',
-        //       event: true,
-        //     });
-        //   }
-        // }, 100);
-
+        logEvent('send-complete');
         console.log('Complete!');
         notifyUser('positive', 'Your tokens have successfully been swept!');
         // isLoading.value = false;
