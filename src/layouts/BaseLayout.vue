@@ -19,14 +19,14 @@
               <span style="font-size: 1rem">Home</span>
             </router-link>
 
-            <router-link
+            <!-- <router-link
               active-class="is-active"
               class="col-auto cursor-pointer dark-toggle q-ml-lg"
               tag="div"
               :to="{ name: 'help' }"
             >
               <span style="font-size: 1rem">Help</span>
-            </router-link>
+            </router-link> -->
 
             <router-link
               v-if="userAddress"

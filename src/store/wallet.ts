@@ -63,19 +63,7 @@ export default function useWalletStore() {
     const responses = await Promise.all(promises);
     const multicallResponse = responses[0] as MulticallResponse;
     const ethResponse = responses[1] as ethers.BigNumber;
-    let tokenBalances = multicallResponse.returnData; // token balances from multicall
-
-    // Append ETH balance to balance array and token list array
-    tokenBalances = [...tokenBalances]; // create new array because otherwise we cannot modify it
-    tokenBalances.push(ethResponse.toHexString());
-    tokenList.push({
-      chainId: 1,
-      address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
-      name: 'Ether',
-      decimals: 18,
-      symbol: 'ETH',
-      logoURI: 'logos/eth.png',
-    });
+    const tokenBalances = multicallResponse.returnData; // token balances from multicall
 
     // Create array of all tokens with their balance and only keep nonzero ones
     balances.value = tokenList
@@ -86,6 +74,21 @@ export default function useWalletStore() {
       }))
       .filter((token) => token.balance.gt(ethers.constants.Zero))
       .sort((token1, token2) => token1.symbol.localeCompare(token2.symbol));
+
+    // Append ETH to the list
+    const ethToken = {
+      chainId: 1,
+      address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+      name: 'Ether',
+      decimals: 18,
+      symbol: 'ETH',
+      logoURI: 'logos/eth.png',
+    };
+    balances.value.push({
+      ...ethToken,
+      balance: ethResponse,
+      amountToSend: 'max',
+    });
   }
 
   return {

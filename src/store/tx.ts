@@ -20,18 +20,22 @@ export default function useTxStore() {
     to.value = ethers.utils.getAddress(val);
   }
   function setTxNonce(val: number) {
+    // Not currently used
     nonce.value = val;
   }
   function setTxGasLimit(val: BigNumberish) {
+    // Not currently used
     gasLimit.value = val;
   }
   function setTxGasPrice(val: BigNumberish) {
     gasPrice.value = val;
   }
   function setTxData(val: BytesLike) {
+    // Not currently used
     data.value = val;
   }
   function setTxValue(val: BigNumberish) {
+    // Used to indicate donation amount
     value.value = val;
   }
 

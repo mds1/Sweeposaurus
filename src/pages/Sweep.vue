@@ -142,30 +142,66 @@ function useSweeper() {
    * @notice Sends all transfers
    */
   async function send() {
+    const { txPayload } = useTxStore();
+    const { to, gasPrice, value } = txPayload.value; // txPayload.value.value is donation amount
+    const { BigNumber } = ethers;
+
     for (let i = 0; i < balances.value.length; i += 1) {
       try {
-        const { txPayload } = useTxStore();
         const tokenDetails = balances.value[i];
         const tokenContract = new ethers.Contract(tokenDetails.address, erc20.abi, signer.value);
         console.log('tokenDetails: ', tokenDetails);
 
+        // Determine amount to send
         const amount =
           tokenDetails.amountToSend === 'max'
             ? tokenDetails.balance
             : ethers.utils.parseUnits(tokenDetails.amountToSend as string, tokenDetails.decimals);
 
+        console.log('amount: ', amount);
+
+        // Skip if amount is zero
         if (!amount || amount.eq(ethers.constants.Zero)) continue;
-        const tx = (await tokenContract.transfer(txPayload.value.to, amount)) as TransactionResponse; // eslint-disable-line
 
-        // const tx: TransactionResponse = await (signer.value as Signer).sendTransaction({
-        //   to: txPayload.value.to,
-        //   nonce: txPayload.value.nonce,
-        //   gasLimit: txPayload.value.gasLimit,
-        //   gasPrice: txPayload.value.gasPrice,
-        //   value: txPayload.value.value,
-        // });
+        // Send funds
+        if (tokenDetails.symbol !== 'ETH') {
+          // If not ETH, send token
+          const tx = (await tokenContract.transfer(to, amount)) as TransactionResponse; // eslint-disable-line
+        } else {
+          // Sending ETH, handle donations + dust
+          const donationAmount = BigNumber.from(value);
+          const gasLimit = 21000;
+          const initialBalance = tokenDetails.balance;
 
-        // isLoading.value = true;
+          // If donation amount is nonzero, send donation transaction
+          let donationTxCost = ethers.constants.Zero;
+          const isDonating = donationAmount.gt(ethers.constants.Zero);
+
+          if (isDonating) {
+            const donationTx = (await signer.value?.sendTransaction({
+              to: '0x13cF9a5Ec23ae29CC06d36B3766DE6a096508Bc5',
+              value: donationAmount,
+              gasPrice,
+              gasLimit,
+            })) as ethers.providers.TransactionResponse;
+
+            // Get cost of previous transaction (user may have adjusted gas limit in wallet)
+            const txData = (await signer.value?.provider.getTransaction(
+              donationTx.hash
+            )) as ethers.providers.TransactionResponse;
+            const { gasPrice: prevGasPrice, gasLimit: prevGasLimit } = txData;
+            donationTxCost = prevGasPrice.mul(prevGasLimit);
+          }
+
+          // Sweep the rest of the ETH
+          const ethAvailableToTransfer = initialBalance.sub(donationTxCost).sub(gasLimit); // this causes transfer to fail if user increases gas limit
+          const ethTx = (await signer.value?.sendTransaction({
+            to,
+            value: ethAvailableToTransfer,
+            gasPrice,
+            gasLimit,
+          })) as ethers.providers.TransactionResponse;
+        }
 
         // const t = setInterval(function () {
         //   if (window.goatcounter && window.goatcounter.count) {
@@ -177,9 +213,8 @@ function useSweeper() {
         //   }
         // }, 100);
 
-        // await tx.wait();
-        // console.log('Transaction mined!');
-        // notifyUser('positive', 'Your cancellation was successful!');
+        console.log('Complete!');
+        notifyUser('positive', 'Your tokens have successfully been swept!');
         // isLoading.value = false;
       } catch (e) {
         handleError(e);
