@@ -4,6 +4,7 @@
   "description": "Sweep all of your tokens to another address",
   "productName": "Sweeposaurus",
   "author": "Matt Solomon <matt@mattsolomon.dev>",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "lint": "eslint --ext .js,.ts,.vue ./",
