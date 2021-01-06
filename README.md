@@ -39,7 +39,10 @@ yarn prettier
 # Start the app in web development mode
 yarn dev
 
-# Build and deploy the app to production
+# Build app for production
+yarn build
+
+# Deploy app
 yarn deploy
 ```
 

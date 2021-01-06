@@ -159,15 +159,12 @@ function useSweeper() {
       try {
         const tokenDetails = balances.value[i];
         const tokenContract = new ethers.Contract(tokenDetails.address, erc20.abi, signer.value);
-        console.log('tokenDetails: ', tokenDetails);
 
         // Determine amount to send
         const amount =
           tokenDetails.amountToSend === 'max'
             ? tokenDetails.balance
             : ethers.utils.parseUnits(tokenDetails.amountToSend as string, tokenDetails.decimals);
-
-        console.log('amount: ', amount);
 
         // Skip if amount is zero
         if (!amount || amount.eq(ethers.constants.Zero)) continue;

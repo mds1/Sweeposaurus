@@ -11,7 +11,8 @@
     "test": "echo \"No test specified\" && exit 0",
     "prettier": "prettier --write .",
     "dev": "quasar dev",
-    "build": "quasar build && firebase deploy"
+    "build": "quasar build",
+    "deploy": "yarn build && firebase deploy"
   },
   "husky": {
     "hooks": {
