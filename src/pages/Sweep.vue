@@ -4,7 +4,7 @@
       <!-- Header section -->
       <h4 class="row justify-center items-center">
         <img class="col-auto q-mr-md" alt="Sweeposaurus logo" src="~assets/app-logo.png" style="max-width: 7rem" />
-        <div class="col-auto">Sweep tokens</div>
+        <div class="col-auto">Sweep Tokens</div>
       </h4>
       <!-- <div class="q-mb-md">Simply click the button below</div> -->
     </div>
@@ -149,6 +149,8 @@ function useSweeper() {
     const { to, gasPrice, value } = txPayload.value; // txPayload.value.value is donation amount
     const { BigNumber } = ethers;
 
+    if (!to) throw new Error('Please specify a recipient address in Step 1');
+
     for (let i = 0; i < balances.value.length; i += 1) {
       try {
         const tokenDetails = balances.value[i];
@@ -181,26 +183,34 @@ function useSweeper() {
           const isDonating = donationAmount.gt(ethers.constants.Zero);
 
           if (isDonating) {
-            const donationTx = (await signer.value?.sendTransaction({
-              to: '0x13cF9a5Ec23ae29CC06d36B3766DE6a096508Bc5',
-              value: donationAmount,
-              gasPrice,
-              gasLimit,
-            })) as ethers.providers.TransactionResponse;
+            let donationTx: ethers.providers.TransactionResponse;
+            try {
+              donationTx = (await signer.value?.sendTransaction({
+                to: '0x13cF9a5Ec23ae29CC06d36B3766DE6a096508Bc5',
+                value: donationAmount,
+                gasPrice,
+                gasLimit,
+              })) as ethers.providers.TransactionResponse;
 
-            // Get cost of previous transaction (user may have adjusted gas limit in wallet)
-            const txData = (await signer.value?.provider.getTransaction(
-              donationTx.hash
-            )) as ethers.providers.TransactionResponse;
-            const { gasPrice: prevGasPrice, gasLimit: prevGasLimit } = txData;
-            donationTxCost = prevGasPrice.mul(prevGasLimit);
+              // Get cost of previous transaction (user may have adjusted gas limit in wallet)
+              const txData = (await signer.value?.provider.getTransaction(
+                donationTx.hash
+              )) as ethers.providers.TransactionResponse;
+              const { gasPrice: prevGasPrice, gasLimit: prevGasLimit } = txData;
+              donationTxCost = prevGasPrice.mul(prevGasLimit).add(donationAmount);
+            } catch (e) {
+              // Continue if user skips donation transaction
+              console.warn(e);
+            }
           }
 
           // Sweep the rest of the ETH
-          const ethAvailableToTransfer = initialBalance.sub(donationTxCost).sub(gasLimit); // this causes transfer to fail if user increases gas limit
+          // (this causes transfer to fail if user increases gas limit)
+          const ethAvailableToTransfer = initialBalance.sub(donationTxCost);
+          const txCost = BigNumber.from(gasPrice).mul(gasLimit);
           const ethTx = (await signer.value?.sendTransaction({
             to,
-            value: ethAvailableToTransfer,
+            value: ethAvailableToTransfer.sub(txCost),
             gasPrice,
             gasLimit,
           })) as ethers.providers.TransactionResponse;

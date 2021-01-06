@@ -1,8 +1,8 @@
 <template>
-  <div>
+  <div class="text-left">
     <!-- We use v-show to ensure mounted hook of components run, which populates default values -->
     <div class="row justify-start q-mt-lg" style="max-width: 800px; margin-left: auto; margin-right: auto">
-      <settings-container setting-name="Recipient" class="card-border-no-hover col-xs-4 q-mx-sm">
+      <settings-container setting-name="Recipient" class="card-border-no-hover col-xs-4 q-mr-md">
         <transaction-payload-to />
       </settings-container>
 

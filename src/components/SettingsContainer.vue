@@ -27,7 +27,5 @@ export default defineComponent({
 <style lang="sass" scoped>
 .title
   font-weight: bold
-  // letter-spacing: 0.1rem
-  text-align: center
-  // text-transform: uppercase
+  text-align: left
 </style>

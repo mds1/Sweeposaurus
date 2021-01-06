@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="text-left">
     <div>Enter the address tokens should be sent to</div>
     <q-input
       v-model="to"

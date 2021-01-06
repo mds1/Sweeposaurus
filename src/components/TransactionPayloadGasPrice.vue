@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="text-left">
     <div>Override the default gas price of {{ gasPriceGwei }} gwei.</div>
     <q-input
       v-model.number="gasPriceGwei"
