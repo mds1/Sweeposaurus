@@ -2,6 +2,8 @@ import { computed, ref } from '@vue/composition-api';
 import { ethers } from 'ethers';
 import { TokenList } from '@uniswap/token-lists';
 import { MulticallResponse, Signer, Provider, TokenDetails } from 'components/models';
+import multicallInfo from 'src/contracts/multicall.json';
+import erc20 from 'src/contracts/erc20.json';
 
 /**
  * State is handled in reusable components, where each component is its own self-contained
@@ -41,17 +43,12 @@ export default function useWalletStore() {
     const tokenList = await fetchTokenList();
 
     // Get Multicall instance
-    // prettier-ignore
-    const multicallAbi = [ { constant: false, inputs: [ { components: [ { internalType: 'address', name: 'target', type: 'address' }, { internalType: 'bytes', name: 'callData', type: 'bytes' }, ], internalType: 'struct Multicall.Call[]', name: 'calls', type: 'tuple[]', }, ], name: 'aggregate', outputs: [ { internalType: 'uint256', name: 'blockNumber', type: 'uint256' }, { internalType: 'bytes[]', name: 'returnData', type: 'bytes[]' }, ], payable: false, stateMutability: 'nonpayable', type: 'function', }, { constant: true, inputs: [{ internalType: 'uint256', name: 'blockNumber', type: 'uint256' }], name: 'getBlockHash', outputs: [{ internalType: 'bytes32', name: 'blockHash', type: 'bytes32' }], payable: false, stateMutability: 'view', type: 'function', }, { constant: true, inputs: [], name: 'getCurrentBlockCoinbase', outputs: [{ internalType: 'address', name: 'coinbase', type: 'address' }], payable: false, stateMutability: 'view', type: 'function', }, { constant: true, inputs: [], name: 'getCurrentBlockDifficulty', outputs: [{ internalType: 'uint256', name: 'difficulty', type: 'uint256' }], payable: false, stateMutability: 'view', type: 'function', }, { constant: true, inputs: [], name: 'getCurrentBlockGasLimit', outputs: [{ internalType: 'uint256', name: 'gaslimit', type: 'uint256' }], payable: false, stateMutability: 'view', type: 'function', }, { constant: true, inputs: [], name: 'getCurrentBlockTimestamp', outputs: [{ internalType: 'uint256', name: 'timestamp', type: 'uint256' }], payable: false, stateMutability: 'view', type: 'function', }, { constant: true, inputs: [{ internalType: 'address', name: 'addr', type: 'address' }], name: 'getEthBalance', outputs: [{ internalType: 'uint256', name: 'balance', type: 'uint256' }], payable: false, stateMutability: 'view', type: 'function', }, { constant: true, inputs: [], name: 'getLastBlockHash', outputs: [{ internalType: 'bytes32', name: 'blockHash', type: 'bytes32' }], payable: false, stateMutability: 'view', type: 'function', } ];
-    const multicallAddress = '0x5e227AD1969Ea493B43F840cfF78d08a6fc17796';
-    const multicall = new ethers.Contract(multicallAddress, multicallAbi, signer.value);
+    const multicall = new ethers.Contract(multicallInfo.address, multicallInfo.abi, signer.value);
 
     // Generate balance calls using Multicall contract
-    // prettier-ignore
-    const erc20Abi = [ { constant: true, inputs: [], name: 'name', outputs: [ { name: '', type: 'string', }, ], payable: false, stateMutability: 'view', type: 'function', }, { constant: false, inputs: [ { name: '_spender', type: 'address', }, { name: '_value', type: 'uint256', }, ], name: 'approve', outputs: [ { name: '', type: 'bool', }, ], payable: false, stateMutability: 'nonpayable', type: 'function', }, { constant: true, inputs: [], name: 'totalSupply', outputs: [ { name: '', type: 'uint256', }, ], payable: false, stateMutability: 'view', type: 'function', }, { constant: false, inputs: [ { name: '_from', type: 'address', }, { name: '_to', type: 'address', }, { name: '_value', type: 'uint256', }, ], name: 'transferFrom', outputs: [ { name: '', type: 'bool', }, ], payable: false, stateMutability: 'nonpayable', type: 'function', }, { constant: true, inputs: [], name: 'decimals', outputs: [ { name: '', type: 'uint8', }, ], payable: false, stateMutability: 'view', type: 'function', }, { constant: true, inputs: [ { name: '_owner', type: 'address', }, ], name: 'balanceOf', outputs: [ { name: 'balance', type: 'uint256', }, ], payable: false, stateMutability: 'view', type: 'function', }, { constant: true, inputs: [], name: 'symbol', outputs: [ { name: '', type: 'string', }, ], payable: false, stateMutability: 'view', type: 'function', }, { constant: false, inputs: [ { name: '_to', type: 'address', }, { name: '_value', type: 'uint256', }, ], name: 'transfer', outputs: [ { name: '', type: 'bool', }, ], payable: false, stateMutability: 'nonpayable', type: 'function', }, { constant: true, inputs: [ { name: '_owner', type: 'address', }, { name: '_spender', type: 'address', }, ], name: 'allowance', outputs: [ { name: '', type: 'uint256', }, ], payable: false, stateMutability: 'view', type: 'function', }, { payable: true, stateMutability: 'payable', type: 'fallback', }, { anonymous: false, inputs: [ { indexed: true, name: 'owner', type: 'address', }, { indexed: true, name: 'spender', type: 'address', }, { indexed: false, name: 'value', type: 'uint256', }, ], name: 'Approval', type: 'event', }, { anonymous: false, inputs: [ { indexed: true, name: 'from', type: 'address', }, { indexed: true, name: 'to', type: 'address', }, { indexed: false, name: 'value', type: 'uint256', }, ], name: 'Transfer', type: 'event', } ];
     const calls = tokenList.map((token) => {
       const { address: tokenAddress } = token;
-      const tokenContract = new ethers.Contract(tokenAddress, erc20Abi, signer.value);
+      const tokenContract = new ethers.Contract(tokenAddress, erc20.abi, signer.value);
       return {
         target: tokenAddress,
         callData: tokenContract.interface.encodeFunctionData('balanceOf', [userAddress.value]),

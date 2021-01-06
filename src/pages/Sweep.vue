@@ -105,6 +105,7 @@ import { TokenInfo } from '@uniswap/token-lists';
 import SettingsAdvanced from 'components/SettingsAdvanced.vue';
 import TransactionPayloadDonation from 'components/TransactionPayloadDonation.vue';
 
+import erc20 from 'src/contracts/erc20.json';
 import useAlerts from 'src/utils/alerts';
 import useWalletStore from 'src/store/wallet';
 import useTxStore from 'src/store/tx';
@@ -128,7 +129,6 @@ function useSweeper() {
     isLoading.value = true;
     await scan();
     isLoading.value = false;
-    console.log('balances: ', balances.value);
   });
 
   function formatBalance(value: string, decimals: string) {
@@ -141,13 +141,21 @@ function useSweeper() {
   /**
    * @notice Sends all transfers
    */
-  function send() {
+  async function send() {
     for (let i = 0; i < balances.value.length; i += 1) {
       try {
+        const { txPayload } = useTxStore();
         const tokenDetails = balances.value[i];
+        const tokenContract = new ethers.Contract(tokenDetails.address, erc20.abi, signer.value);
         console.log('tokenDetails: ', tokenDetails);
 
-        // const { txPayload } = useTxStore();
+        const amount =
+          tokenDetails.amountToSend === 'max'
+            ? tokenDetails.balance
+            : ethers.utils.parseUnits(tokenDetails.amountToSend as string, tokenDetails.decimals);
+
+        if (!amount || amount.eq(ethers.constants.Zero)) continue;
+        const tx = (await tokenContract.transfer(txPayload.value.to, amount)) as TransactionResponse; // eslint-disable-line
 
         // const tx: TransactionResponse = await (signer.value as Signer).sendTransaction({
         //   to: txPayload.value.to,

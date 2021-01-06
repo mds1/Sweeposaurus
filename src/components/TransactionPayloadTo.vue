@@ -7,8 +7,7 @@
       dense
       filled
       label="Recipient"
-      style="max-width: 100px; display: inline-block"
-      type="number"
+      style="max-width: 500px; display: inline-block"
       @input="setRecipient"
     />
   </div>
