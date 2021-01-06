@@ -2,11 +2,15 @@
   <q-page padding class="text-center">
     <div>
       <!-- Header section -->
-      <h4 class="row justify-center items-center">
+      <h4 class="row justify-center items-center q-mb-none">
         <img class="col-auto q-mr-md" alt="Sweeposaurus logo" src="~assets/app-logo.png" style="max-width: 7rem" />
         <div class="col-auto">Sweep Tokens</div>
       </h4>
-      <!-- <div class="q-mb-md">Simply click the button below</div> -->
+      <div class="row justify-center text-center text-italic">
+        <div class="col-auto q-pa-sm" style="border: 2px solid #e67635; border-radius: 10px">
+          This is beta software and has not been heavily tested. Use at your own risk.
+        </div>
+      </div>
     </div>
 
     <div v-if="isLoading">
@@ -32,7 +36,7 @@
           If you have a lot of tokens, this will be a long table&mdash;just keep scrolling for step 3!
         </div>
         <q-table
-          class="q-mt-md"
+          class="top-border q-mt-md"
           title="Tokens"
           :data="balances"
           :columns="tableColumns"

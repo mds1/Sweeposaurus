@@ -1,5 +1,5 @@
 <template>
-  <q-card class="shadow-2 q-pa-md">
+  <q-card class="top-border shadow-2 q-pa-md">
     <div class="title">{{ settingName }}</div>
     <slot></slot>
   </q-card>
