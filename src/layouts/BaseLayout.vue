@@ -19,14 +19,14 @@
               <span style="font-size: 1rem">Home</span>
             </router-link>
 
-            <!-- <router-link
+            <router-link
               active-class="is-active"
               class="col-auto cursor-pointer dark-toggle q-ml-lg"
               tag="div"
-              :to="{ name: 'help' }"
+              :to="{ name: 'faq' }"
             >
-              <span style="font-size: 1rem">Help</span>
-            </router-link> -->
+              <span style="font-size: 1rem">FAQ</span>
+            </router-link>
 
             <router-link
               v-if="userAddress"
@@ -62,9 +62,19 @@
     </q-page-container>
 
     <q-footer style="color: #000000; background-color: rgba(0, 0, 0, 0)">
-      <div class="dark-toggle text-center text-caption q-my-xl">
-        Built by
-        <a href="https://twitter.com/msolomon44" target="_blank" class="hyperlink">Matt Solomon</a>
+      <div class="row justify-between dark-toggle text-caption q-my-xl q-mx-md">
+        <div class="col-auto">
+          <!-- Empty first column: lazy way to make second column approximately centered and third column right-aligned -->
+        </div>
+        <div class="col-auto">
+          Built by
+          <a href="https://twitter.com/msolomon44" target="_blank" class="hyperlink">Matt Solomon</a>
+        </div>
+        <div class="col-auto">
+          <a href="https://github.com/mds1/Sweeposaurus" target="_blank" class="dark-toggle no-text-decoration">
+            <q-icon name="fab fa-github" size="sm" />
+          </a>
+        </div>
       </div>
     </q-footer>
   </q-layout>

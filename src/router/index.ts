@@ -25,7 +25,7 @@ export default route(function ({ Vue }) {
     // Only allow user to navigate directly to home page
     // Navigating to home page is allowed. Navigating to other pages without visiting
     // home page is not allowed. This is to ensure the user connects a wallet first
-    if (to.name === 'home' || to.name === 'help') {
+    if (to.name === 'home' || to.name === 'faq') {
       next();
     } else if (from.name === null) {
       next({ name: 'home' });
