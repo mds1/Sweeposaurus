@@ -6,6 +6,8 @@ import multicallInfo from 'src/contracts/multicall.json';
 import erc20 from 'src/contracts/erc20.json';
 import useAnalytics from 'src/utils/analytics';
 
+const { Zero } = ethers.constants;
+
 // Returns an address with the following format: 0x1234...abcd
 const formatAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(38)}`;
 
@@ -79,12 +81,13 @@ export default function useWalletStore() {
 
     // Create array of all tokens with their balance and only keep nonzero ones
     balances.value = tokenList
-      .map((token, index) => ({
-        ...token,
-        balance: ethers.BigNumber.from(tokenBalances[index]),
-        amountToSend: 'max',
-      }))
-      .filter((token) => token.balance.gt(ethers.constants.Zero))
+      .map((token, index) => {
+        // `tokenBalances[index] === '0x'` occurs when a token in the token list is an EOA or non ERC-20 contract, so
+        // instead of returning a balance we get no data
+        const balance = tokenBalances[index] === '0x' ? Zero : ethers.BigNumber.from(tokenBalances[index]);
+        return { ...token, balance, amountToSend: 'max' };
+      })
+      .filter((token) => token.balance.gt(Zero))
       .sort((token1, token2) => token1.symbol.localeCompare(token2.symbol));
 
     // Append ETH to the list
