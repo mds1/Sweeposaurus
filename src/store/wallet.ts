@@ -6,6 +6,9 @@ import multicallInfo from 'src/contracts/multicall.json';
 import erc20 from 'src/contracts/erc20.json';
 import useAnalytics from 'src/utils/analytics';
 
+// Returns an address with the following format: 0x1234...abcd
+const formatAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(38)}`;
+
 /**
  * State is handled in reusable components, where each component is its own self-contained
  * file consisting of one function defined used the composition API.
@@ -21,6 +24,7 @@ import useAnalytics from 'src/utils/analytics';
 const provider = ref<Provider | undefined>(undefined);
 const signer = ref<Signer | undefined>(undefined);
 const userAddress = ref<string | undefined>(undefined);
+const userDisplayName = ref<string | undefined>(undefined);
 const balances = ref<TokenDetails[]>([]);
 
 export default function useWalletStore() {
@@ -29,7 +33,11 @@ export default function useWalletStore() {
   async function setProvider(p: any) {
     provider.value = new ethers.providers.Web3Provider(p);
     signer.value = provider.value.getSigner();
-    userAddress.value = await signer.value.getAddress();
+    const _userAddress = await signer.value.getAddress();
+    const userEns = await provider.value.lookupAddress(_userAddress);
+
+    userAddress.value = _userAddress;
+    userDisplayName.value = userEns || formatAddress(_userAddress);
   }
 
   async function fetchTokenList() {
@@ -99,6 +107,7 @@ export default function useWalletStore() {
     provider: computed(() => provider.value),
     signer: computed(() => signer.value),
     userAddress: computed(() => userAddress.value),
+    userDisplayName: computed(() => userDisplayName.value),
     setProvider,
     scan,
     balances: computed(() => balances.value),

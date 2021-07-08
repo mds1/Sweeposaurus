@@ -44,7 +44,7 @@
         <div class="col">
           <div class="row justify-end q-mt-xs">
             <div v-if="userAddress" class="col-xs-12 dark-toggle text-caption text-right">
-              {{ userAddress }}
+              {{ userDisplayName }}
             </div>
             <q-icon
               class="col-auto dark-toggle"
@@ -99,9 +99,9 @@ function useDarkMode() {
 }
 
 function useWalletAddress() {
-  const { userAddress } = useWalletStore();
+  const { userAddress, userDisplayName } = useWalletStore();
 
-  return { userAddress };
+  return { userAddress, userDisplayName };
 }
 
 export default defineComponent({
