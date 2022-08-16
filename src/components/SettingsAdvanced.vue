@@ -5,10 +5,6 @@
       <settings-container setting-name="Recipient" class="card-border-no-hover col-xs-4 q-mr-md">
         <transaction-payload-to />
       </settings-container>
-
-      <settings-container setting-name="Gas Price" class="card-border-no-hover col-xs-4 q-mx-sm">
-        <transaction-payload-gas-price />
-      </settings-container>
     </div>
   </div>
 </template>
@@ -16,14 +12,12 @@
 <script lang="ts">
 import { defineComponent } from '@vue/composition-api';
 import SettingsContainer from 'components/SettingsContainer.vue';
-import TransactionPayloadGasPrice from 'components/TransactionPayloadGasPrice.vue';
 import TransactionPayloadTo from 'components/TransactionPayloadTo.vue';
 
 export default defineComponent({
   name: 'SettingsAdvanced',
 
   components: {
-    TransactionPayloadGasPrice,
     TransactionPayloadTo,
     SettingsContainer,
   },

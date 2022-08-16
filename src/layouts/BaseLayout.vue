@@ -46,12 +46,6 @@
             <div v-if="userAddress" class="col-xs-12 dark-toggle text-caption text-right">
               {{ userDisplayName }}
             </div>
-            <q-icon
-              class="col-auto dark-toggle"
-              :name="$q.dark.isActive ? 'fas fa-sun' : 'fas fa-moon'"
-              style="cursor: pointer"
-              @click="toggleDarkMode()"
-            />
           </div>
         </div>
       </q-toolbar>
@@ -64,7 +58,12 @@
     <q-footer style="color: #000000; background-color: rgba(0, 0, 0, 0)">
       <div class="row justify-between dark-toggle text-caption q-my-xl q-mx-md">
         <div class="col-auto">
-          <!-- Empty first column: lazy way to make second column approximately centered and third column right-aligned -->
+          <q-icon
+            class="col-auto dark-toggle"
+            :name="$q.dark.isActive ? 'fas fa-sun' : 'fas fa-moon'"
+            style="cursor: pointer"
+            @click="toggleDarkMode()"
+          />
         </div>
         <div class="col-auto">
           Built by
