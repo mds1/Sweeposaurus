@@ -20,10 +20,10 @@ function useWallet(context: SetupContext, redirectTo: string) {
     const wallets = [
       { walletName: 'metamask', preferred: true },
       { walletName: 'coinbase', preferred: true },
-      { walletName: 'torus', preferred: true },
+      { walletName: 'torus' },
       { walletName: 'ledger', rpcUrl },
       { walletName: 'trezor', appUrl: 'https://sweeposaurus.com/sweep', email: 'matt@mattsolomon.dev', rpcUrl },
-      { walletName: 'fortmatic', apiKey: process.env.FORTMATIC_API_KEY, preferred: true },
+      { walletName: 'fortmatic', apiKey: process.env.FORTMATIC_API_KEY },
       { walletName: 'portis', apiKey: process.env.PORTIS_API_KEY },
       { walletName: 'authereum' },
       { walletName: 'walletConnect', infuraKey: process.env.INFURA_ID, preferred: true },

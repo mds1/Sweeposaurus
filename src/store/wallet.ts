@@ -36,7 +36,7 @@ export default function useWalletStore() {
     provider.value = new ethers.providers.Web3Provider(p);
     signer.value = provider.value.getSigner();
     const _userAddress = await signer.value.getAddress();
-    const userEns = await provider.value.lookupAddress(_userAddress);
+    const userEns = null; /* await provider.value.lookupAddress(_userAddress); */ // TODO
 
     userAddress.value = _userAddress;
     userDisplayName.value = userEns || formatAddress(_userAddress);
