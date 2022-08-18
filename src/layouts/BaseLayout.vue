@@ -43,8 +43,11 @@
         <!-- Login address and settings -->
         <div class="col">
           <div class="row justify-end q-mt-xs">
-            <div v-if="userAddress" class="col-xs-12 dark-toggle text-caption text-right">
-              {{ userDisplayName }}
+            <div class="row text-caption cursor-pointer dark-toggle">
+              <span v-if="userDisplayName">
+                {{ userDisplayName }}
+              </span>
+              <Avatar v-if="userAddress" :address="userAddress" :avatar="avatar" class="q-ml-sm" />
             </div>
           </div>
         </div>
@@ -83,6 +86,7 @@
 import { defineComponent, onMounted } from '@vue/composition-api';
 import { Dark, LocalStorage } from 'quasar';
 import useWalletStore from 'src/store/wallet';
+import Avatar from 'src/components/Avatar.vue';
 
 function useDarkMode() {
   function toggleDarkMode() {
@@ -98,13 +102,13 @@ function useDarkMode() {
 }
 
 function useWalletAddress() {
-  const { userAddress, userDisplayName } = useWalletStore();
-
-  return { userAddress, userDisplayName };
+  const { avatar, userAddress, userDisplayName } = useWalletStore();
+  return { avatar, userAddress, userDisplayName };
 }
 
 export default defineComponent({
   name: 'BaseLayout',
+  components: { Avatar },
   setup() {
     return { ...useDarkMode(), ...useWalletAddress() };
   },

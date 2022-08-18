@@ -21,6 +21,7 @@
     }
   },
   "dependencies": {
+    "@metamask/jazzicon": "^2.0.0",
     "@quasar/extras": "^1.0.0",
     "@unilogin/provider": "^0.6.1",
     "@uniswap/token-lists": "^1.0.0-beta.19",

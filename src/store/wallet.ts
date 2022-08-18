@@ -1,5 +1,6 @@
 import { computed, ref } from '@vue/composition-api';
 import { ethers } from 'ethers';
+import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { TokenList } from '@uniswap/token-lists';
 import { MulticallResponse, Signer, Provider, TokenDetails } from 'components/models';
 import multicallInfo from 'src/contracts/multicall.json';
@@ -7,6 +8,9 @@ import erc20 from 'src/contracts/erc20.json';
 import useAnalytics from 'src/utils/analytics';
 
 const { Zero } = ethers.constants;
+
+export const MAINNET_RPC_URL = `https://mainnet.infura.io/v3/${String(process.env.INFURA_ID)}`;
+export const MAINNET_PROVIDER = new StaticJsonRpcProvider(MAINNET_RPC_URL);
 
 // Returns an address with the following format: 0x1234...abcd
 const formatAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(38)}`;
@@ -28,6 +32,7 @@ const signer = ref<Signer | undefined>(undefined);
 const chainId = ref<number | undefined>(undefined);
 const userAddress = ref<string | undefined>(undefined);
 const userDisplayName = ref<string | undefined>(undefined);
+const avatar = ref<string | null>('');
 const balances = ref<TokenDetails[]>([]);
 
 export default function useWalletStore() {
@@ -37,15 +42,20 @@ export default function useWalletStore() {
     provider.value = new ethers.providers.Web3Provider(p);
     signer.value = provider.value.getSigner();
     const [_userAddress, _network] = await Promise.all([signer.value.getAddress(), provider.value.getNetwork()]);
-    const userEns = null; /* await provider.value.lookupAddress(_userAddress); */ // TODO
-    chainId.value = _network.chainId;
-
     userAddress.value = _userAddress;
+    chainId.value = _network.chainId;
+    userDisplayName.value = formatAddress(_userAddress);
+
+    const userEns = await MAINNET_PROVIDER.lookupAddress(_userAddress);
+    if (typeof userEns === 'string') {
+      // ENS address must exist
+      avatar.value = await MAINNET_PROVIDER.getAvatar(userEns);
+    }
     userDisplayName.value = userEns || formatAddress(_userAddress);
   }
 
   async function fetchTokenList() {
-    const jsonFetch = (url: string) => fetch(url).then((res) => res.json());
+  const jsonFetch = (url: string) => fetch(url).then((res) => res.json());
     const url = 'https://tokens.coingecko.com/uniswap/all.json';
     const response = (await jsonFetch(url)) as TokenList;
     return response.tokens;
@@ -62,12 +72,13 @@ export default function useWalletStore() {
     const multicall = new ethers.Contract(multicallInfo.address, multicallInfo.abi, signer.value);
 
     // Generate balance calls using Multicall contract
+    const userAddr = userAddress.value || await signer.value?.getAddress();
     const calls = tokenList.map((token) => {
       const { address: tokenAddress } = token;
       const tokenContract = new ethers.Contract(tokenAddress, erc20.abi, signer.value);
       return {
         target: tokenAddress,
-        callData: tokenContract.interface.encodeFunctionData('balanceOf', [userAddress.value]),
+        callData: tokenContract.interface.encodeFunctionData('balanceOf', [userAddr]),
       };
     });
 
@@ -111,6 +122,7 @@ export default function useWalletStore() {
   return {
     provider: computed(() => provider.value),
     signer: computed(() => signer.value),
+    avatar: computed(() => avatar.value),
     chainId: computed(() => chainId.value),
     userAddress: computed(() => userAddress.value),
     userDisplayName: computed(() => userDisplayName.value),
