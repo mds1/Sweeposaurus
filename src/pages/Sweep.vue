@@ -107,6 +107,7 @@
 <script lang="ts">
 import { defineComponent, onMounted, ref } from '@vue/composition-api';
 import { ethers } from 'ethers';
+import { serialize as serializeTransaction } from '@ethersproject/transactions';
 
 import SettingsAdvanced from 'components/SettingsAdvanced.vue';
 import TransactionPayloadDonation from 'components/TransactionPayloadDonation.vue';
@@ -120,7 +121,7 @@ import { TransactionResponse } from 'components/models';
 
 function useSweeper() {
   const { notifyUser, handleError } = useAlerts();
-  const { balances, scan, signer } = useWalletStore();
+  const { balances, scan, signer, userAddress } = useWalletStore();
 
   const isLoading = ref(true);
   const tableColumns = [
@@ -142,17 +143,48 @@ function useSweeper() {
     });
   }
 
+  async function getEthSweepGasInfo(from: string, to: string) {
+    const provider = signer.value?.provider;
+    if (!provider) throw new Error('Provider not found');
+
+    const [network, fromBalance, gasPrice] = await Promise.all([
+      provider.getNetwork(),
+      provider.getBalance(from),
+      provider.getGasPrice(),
+    ]);
+    const { chainId } = network;
+    const gasLimit = await provider.estimateGas({ gasPrice: 0, to, from, value: fromBalance });
+
+    // On Optimism, we ask the gas price oracle for the L1 data fee that we should add on top of the L2 execution
+    // cost: https://community.optimism.io/docs/developers/build/transaction-fees/
+    // For Arbitrum, this is baked into the gasPrice returned from the provider.
+    let txCost = gasPrice.mul(gasLimit);
+    if (chainId === 10) {
+      const nonce = await provider.getTransactionCount(from);
+      const gasOracleAbi = ['function getL1Fee(bytes memory _data) public view returns (uint256)'];
+      const gasPriceOracle = new ethers.Contract('0x420000000000000000000000000000000000000F', gasOracleAbi, provider);
+      // eslint-disable-next-line
+      const l1FeeInWei = await gasPriceOracle.getL1Fee(
+        serializeTransaction({ to, value: fromBalance, data: '0x', gasLimit, gasPrice, nonce })
+      );
+      txCost = txCost.add(l1FeeInWei);
+    }
+
+    // Return the gas price, gas limit, and the transaction cost
+    return { gasPrice, gasLimit, txCost, fromBalance, ethToSend: fromBalance.sub(txCost), chainId };
+  }
+
   /**
    * @notice Sends all transfers
    */
   async function send() {
     const { txPayload } = useTxStore();
     const { logEvent } = useAnalytics();
-    const { to, gasPrice, value } = txPayload.value; // txPayload.value.value is donation amount
+    const { to, value } = txPayload.value; // txPayload.value.value is donation amount
     const { BigNumber } = ethers;
 
     if (!to) throw new Error('Please specify a recipient address in Step 1');
-
+    if (!userAddress.value) throw new Error('User address not found');
     logEvent('send-started');
 
     for (let i = 0; i < balances.value.length; i += 1) {
@@ -176,45 +208,24 @@ function useSweeper() {
         } else {
           // Sending ETH, handle donations + dust
           const donationAmount = BigNumber.from(value);
-          const gasLimit = 21000;
-          const initialBalance = tokenDetails.balance;
-
-          // If donation amount is nonzero, send donation transaction
-          let donationTxCost = ethers.constants.Zero;
           const isDonating = donationAmount.gt(ethers.constants.Zero);
 
           if (isDonating) {
-            let donationTx: ethers.providers.TransactionResponse;
             try {
-              donationTx = (await signer.value?.sendTransaction({
-                to: '0x13cF9a5Ec23ae29CC06d36B3766DE6a096508Bc5',
-                value: donationAmount,
-                gasPrice,
-                gasLimit,
-              })) as ethers.providers.TransactionResponse;
-
-              // Get cost of previous transaction (user may have adjusted gas limit in wallet)
-              const txData = (await signer.value?.provider.getTransaction(
-                donationTx.hash
-              )) as ethers.providers.TransactionResponse;
-              const { gasPrice: prevGasPrice, gasLimit: prevGasLimit } = txData;
-              donationTxCost = prevGasPrice.mul(prevGasLimit).add(donationAmount);
+              const donationAddr = '0x13cF9a5Ec23ae29CC06d36B3766DE6a096508Bc5';
+              await signer.value?.sendTransaction({ to: donationAddr, value: donationAmount });
             } catch (e) {
-              // Continue if user skips donation transaction
+              // Continue if user choose to skip/reject donation transaction
+              console.warn('Donation transaction failed. See below for details.');
               console.warn(e);
             }
           }
 
           // Sweep the rest of the ETH
-          // (this causes transfer to fail if user increases gas limit)
-          const ethAvailableToTransfer = initialBalance.sub(donationTxCost);
-          const txCost = BigNumber.from(gasPrice).mul(gasLimit);
-          const ethTx = (await signer.value?.sendTransaction({
-            to,
-            value: ethAvailableToTransfer.sub(txCost),
-            gasPrice,
-            gasLimit,
-          })) as ethers.providers.TransactionResponse;
+          const sweepInfo = await getEthSweepGasInfo(userAddress.value, to);
+          const { gasPrice, gasLimit, txCost, fromBalance, ethToSend } = sweepInfo;
+          if (txCost.gt(fromBalance)) throw new Error('Insufficient ETH balance to sweep ETH from account');
+          await signer.value?.sendTransaction({ to, value: ethToSend, gasPrice, gasLimit });
         }
 
         logEvent('send-complete');
