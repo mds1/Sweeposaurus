@@ -25,6 +25,7 @@ const formatAddress = (address: string) => `${address.slice(0, 6)}...${address.s
 // As a result, only actions, mutations, and getters are returned from this function.
 const provider = ref<Provider | undefined>(undefined);
 const signer = ref<Signer | undefined>(undefined);
+const chainId = ref<number | undefined>(undefined);
 const userAddress = ref<string | undefined>(undefined);
 const userDisplayName = ref<string | undefined>(undefined);
 const balances = ref<TokenDetails[]>([]);
@@ -35,8 +36,9 @@ export default function useWalletStore() {
   async function setProvider(p: any) {
     provider.value = new ethers.providers.Web3Provider(p);
     signer.value = provider.value.getSigner();
-    const _userAddress = await signer.value.getAddress();
+    const [_userAddress, _network] = await Promise.all([signer.value.getAddress(), provider.value.getNetwork()]);
     const userEns = null; /* await provider.value.lookupAddress(_userAddress); */ // TODO
+    chainId.value = _network.chainId;
 
     userAddress.value = _userAddress;
     userDisplayName.value = userEns || formatAddress(_userAddress);
@@ -109,6 +111,7 @@ export default function useWalletStore() {
   return {
     provider: computed(() => provider.value),
     signer: computed(() => signer.value),
+    chainId: computed(() => chainId.value),
     userAddress: computed(() => userAddress.value),
     userDisplayName: computed(() => userDisplayName.value),
     setProvider,

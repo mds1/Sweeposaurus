@@ -9,9 +9,10 @@ import { defineComponent, SetupContext } from '@vue/composition-api';
 import { Dark } from 'quasar';
 import useWalletStore from 'src/store/wallet';
 import Onboard from 'bnc-onboard';
+import { getAddress } from '@ethersproject/address';
 
 function useWallet(context: SetupContext, redirectTo: string) {
-  const { setProvider } = useWalletStore();
+  const { setProvider, userAddress, chainId } = useWalletStore();
 
   async function connectWallet() {
     const rpcUrl = `https://mainnet.infura.io/v3/${String(process.env.INFURA_ID)}`;
@@ -61,6 +62,17 @@ function useWallet(context: SetupContext, redirectTo: string) {
             await wallet.connect();
           }
           await setProvider(wallet.provider);
+        },
+        // Refresh on address/network change for safety.
+        address: (address) => {
+          if (address && userAddress.value && userAddress.value !== getAddress(address)) {
+            window.location.reload();
+          }
+        },
+        network: (newChainId) => {
+          if (chainId.value && chainId.value !== newChainId) {
+            window.location.reload();
+          }
         },
       },
     });
