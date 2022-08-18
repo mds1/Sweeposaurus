@@ -55,10 +55,10 @@ export default function useWalletStore() {
   }
 
   async function fetchTokenList() {
-  const jsonFetch = (url: string) => fetch(url).then((res) => res.json());
-    const url = 'https://tokens.coingecko.com/uniswap/all.json';
+    const jsonFetch = (url: string) => fetch(url).then((res) => res.json());
+    const url = 'https://tokens.uniswap.org/'; // Includes tokens for various networks
     const response = (await jsonFetch(url)) as TokenList;
-    return response.tokens;
+    return response.tokens.filter((token) => token.chainId === chainId.value);
   }
 
   async function scan() {
@@ -72,7 +72,7 @@ export default function useWalletStore() {
     const multicall = new ethers.Contract(multicallInfo.address, multicallInfo.abi, signer.value);
 
     // Generate balance calls using Multicall contract
-    const userAddr = userAddress.value || await signer.value?.getAddress();
+    const userAddr = userAddress.value || (await signer.value?.getAddress());
     const calls = tokenList.map((token) => {
       const { address: tokenAddress } = token;
       const tokenContract = new ethers.Contract(tokenAddress, erc20.abi, signer.value);
